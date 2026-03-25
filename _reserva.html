@@ -1,0 +1,100 @@
+
+  <!-- ===== RESULTS AREA (hidden until search is done) ===== -->
+  <div id="results-area" class="hidden">
+
+    <!-- Stats Row -->
+    <div class="stats-row" aria-label="Estatísticas da busca">
+      <div class="stat-card accent">
+        <span class="stat-value" id="stat-total-videos">0</span>
+        <span class="stat-label">Vídeos encontrados</span>
+      </div>
+      <div class="stat-card blue">
+        <span class="stat-value" id="stat-total-duration">0h</span>
+        <span class="stat-label">Duração total</span>
+      </div>
+      <div class="stat-card green">
+        <span class="stat-value" id="stat-days-needed">0</span>
+        <span class="stat-label">Dias necessários</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="stat-ignored">0</span>
+        <span class="stat-label">Vídeos ignorados</span>
+      </div>
+    </div>
+
+    <!-- Top 5 Words -->
+    <section class="top-words-section card" aria-labelledby="words-heading">
+      <p class="section-label" id="words-heading">🏆 Top 5 Palavras nos Títulos &amp; Descrições</p>
+      <!--
+        JS deve renderizar aqui uma lista de .word-badge com estrutura:
+        <span class="word-badge">
+          <span class="word-rank">#1</span>
+          <span class="word-text">palavra</span>
+          <span class="word-count">42×</span>
+        </span>
+      -->
+      <div class="words-list" id="top-words-list" aria-live="polite">
+        <!-- Renderizado pelo JS -->
+      </div>
+    </section>
+
+
+    
+
+    <!-- Watch Schedule (day-by-day plan) -->
+    <section class="schedule-output-section card" aria-labelledby="plan-heading">
+      <div class="results-header">
+        <p class="results-title" id="plan-heading">📋 Plano de Visualização</p>
+        <span class="results-meta" id="plan-meta">— dias</span>
+      </div>
+      <!--
+        JS deve renderizar aqui uma .schedule-timeline com itens .timeline-day:
+        <div class="timeline-day">
+          <div class="timeline-day-label">
+            <span class="timeline-day-name">Dia 1 (Seg)</span>
+            <span class="timeline-day-time">120 min</span>
+          </div>
+          <div class="timeline-videos">
+            <span class="timeline-video-chip">
+              <span class="chip-duration">20 min</span>
+              <span class="chip-title">Título do vídeo</span>
+            </span>
+          </div>
+          <span class="timeline-day-total">50 / 120 min</span>
+        </div>
+
+        Para dias sem vídeos:
+        <div class="timeline-day">
+          ...
+          <div class="timeline-videos">
+            <span class="timeline-empty">Nenhum vídeo encaixa neste dia</span>
+          </div>
+          ...
+        </div>
+      -->
+      <div class="schedule-timeline" id="schedule-timeline" aria-live="polite">
+        <!-- Renderizado pelo JS -->
+      </div>
+    </section>
+
+    <hr class="divider" />
+   <a class="video-item" href="https://youtube.com/watch?v=ID" target="_blank" rel="noopener">
+          <span class="video-order">#1</span>
+          <div class="video-thumb">
+            <img src={} alt="Thumb do vídeo" loading="lazy" />
+          </div>
+          <div class="video-info">
+            <h3 id="title"></h3>
+            <p id="description"></p>
+            <div class="video-meta">
+              <span id="minutes" class="meta-badge duration"></span>
+              <span class="meta-badge channel">Canal</span>
+              <!-- Adicionar se ignorado: -->
+              <span class="meta-badge ignored">Ignorado</span>
+            </div>
+          </div>
+        </a>
+
+         <div class="video-list" id="video-list" aria-live="polite">
+        <!-- Renderizado pelo JS -->
+      </div>
