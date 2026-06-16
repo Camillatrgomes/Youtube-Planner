@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YouTube Video Planner</title>
   <meta name="description" content="Planeje sua fila de vídeos do YouTube com base no seu tempo disponível por dia." />
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
@@ -15,7 +15,7 @@
   <header>
     <div class="logo-icon" aria-hidden="true">
       <!-- YouTube play icon -->
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
         <path d="M10 8l6 4-6 4V8z"/>
       </svg>
     </div>
@@ -64,21 +64,33 @@
   <section class="schedule-section card" aria-labelledby="schedule-heading">
     <p class="section-label" id="schedule-heading">📅 Tempo Disponível por Dia (minutos)</p>
 
-    <div class="days-grid">
-      <!-- DOM: inputs com id day-0 (Seg) … day-6 (Dom) -->
-      <div class="day-cell">
+    <div class="days-grid" id="days-grid">
+      <!-- DOM: inputs com id day-0 (Seg) … day-6 (Dom) — gerados pelo JS para aplicar destaque de hoje -->
+      <div class="day-cell" id="cell-0">
         <span class="day-label">Seg</span>
         <input type="number" id="day-0" min="0" max="1440" value="0" aria-label="Minutos disponíveis na segunda-feira" />
+      </div>
+      <div class="day-cell" id="cell-1">
         <span class="day-label">Ter</span>
         <input type="number" id="day-1" min="0" max="1440" value="0" aria-label="Minutos disponíveis na terça-feira" />
+      </div>
+      <div class="day-cell" id="cell-2">
         <span class="day-label">Qua</span>
         <input type="number" id="day-2" min="0" max="1440" value="0" aria-label="Minutos disponíveis na quarta-feira" />
+      </div>
+      <div class="day-cell" id="cell-3">
         <span class="day-label">Qui</span>
         <input type="number" id="day-3" min="0" max="1440" value="0" aria-label="Minutos disponíveis na quinta-feira" />
+      </div>
+      <div class="day-cell" id="cell-4">
         <span class="day-label">Sex</span>
         <input type="number" id="day-4" min="0" max="1440" value="0" aria-label="Minutos disponíveis na sexta-feira" />
+      </div>
+      <div class="day-cell" id="cell-5">
         <span class="day-label">Sáb</span>
         <input type="number" id="day-5" min="0" max="1440" value="0" aria-label="Minutos disponíveis no sábado" />
+      </div>
+      <div class="day-cell" id="cell-6">
         <span class="day-label">Dom</span>
         <input type="number" id="day-6" min="0" max="1440" value="0" aria-label="Minutos disponíveis no domingo" />
       </div>

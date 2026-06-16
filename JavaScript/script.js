@@ -1,27 +1,56 @@
 
 const API_KEY = "AIzaSyBTBc6OLgxIK3BfkMJsjKsK7DoysZ3j4DQ";
-const inputVideos = document.getElementById('searchVideos')
-const buttonVideos = document.getElementById('btn-search')
+const inputVideos = document.getElementById('searchVideos');
+const buttonVideos = document.getElementById('btn-search');
+
+// ── Highlight today's day cell ────────────────────────────
+function destacarDiaHoje() {
+  const hoje = new Date().getDay(); // 0 = domingo
+  // Mapeia: domingo (0) => cell-6, segunda (1) => cell-0, ... sábado (6) => cell-5
+  const indice = hoje === 0 ? 6 : hoje - 1;
+  const cell = document.getElementById(`cell-${indice}`);
+  if (cell) cell.classList.add('today');
+}
+
+// ── Loading state on button ───────────────────────────────
+function setLoading(isLoading) {
+  if (isLoading) {
+    buttonVideos.disabled = true;
+    buttonVideos.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"
+           style="animation: spin 0.65s linear infinite; display:block;">
+        <path d="M12 2a10 10 0 0 1 10 10"/>
+        <path d="M22 12a10 10 0 0 1-10 10"/>
+        <path d="M12 22a10 10 0 0 1-10-10"/>
+        <path d="M2 12a10 10 0 0 1 10-10"/>
+      </svg>
+      Buscando…`;
+  } else {
+    buttonVideos.disabled = false;
+    buttonVideos.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      Pesquisar`;
+  }
+}
 
 async function API(termo) {
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${termo}&maxResults=50&type=video&key=${API_KEY}`
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(termo)}&maxResults=50&type=video&key=${API_KEY}`;
 
   const resposta = await fetch(url);
   const dados = await resposta.json();
 
-  console.log(dados.items)
-
   if (dados.error) {
-    console.log("Erro no API do youtube:", dados.error.message)
-    return []
+    console.error("Erro no API do youtube:", dados.error.message);
+    mostrarErro(dados.error.message);
+    return [];
   }
-  return dados.items || []
-};
+  return dados.items || [];
+}
 
 
 async function pegarDuracoes(videos) {
-  console.log("O que recebi em videos:", videos);
-
   if (!Array.isArray(videos) || videos.length === 0) return new Map();
 
   const ids = videos
@@ -35,12 +64,11 @@ async function pegarDuracoes(videos) {
 
   // Retorna um Map { videoId -> duracaoEmMinutos } para não depender da ordem da API
   const duracaoMap = new Map();
-  data.items.forEach(item => {
+  (data.items || []).forEach(item => {
     duracaoMap.set(item.id, converterDuracoes(item.contentDetails.duration));
   });
   return duracaoMap;
-
-};
+}
 
 function converterDuracoes(iso) {
   const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
@@ -49,9 +77,18 @@ function converterDuracoes(iso) {
   const minutos = parseInt(match[2] || 0);
   const segundos = parseInt(match[3] || 0);
 
-  return horas * 60 + minutos + Math.ceil(segundos / 60)
+  return horas * 60 + minutos + Math.ceil(segundos / 60);
 }
 
+function mostrarErro(msg) {
+  const banner = document.getElementById('error-banner');
+  const txt = document.getElementById('error-message');
+  if (banner && txt) {
+    txt.textContent = msg || 'Ocorreu um erro.';
+    banner.classList.remove('hidden');
+    setTimeout(() => banner.classList.add('hidden'), 6000);
+  }
+}
 
 function getFavoritos() {
   return JSON.parse(localStorage.getItem('favoritosSalvos')) || [];
@@ -79,17 +116,36 @@ function criarCardVideo(video, i) {
 
   const wrapper = document.createElement('div');
   wrapper.className = 'video-item-wrapper';
+  wrapper.style.animationDelay = `${Math.min(i * 0.04, 0.4)}s`;
+
+  const thumbUrl = video.snippet?.thumbnails?.high?.url
+    || video.snippet?.thumbnails?.medium?.url
+    || video.snippet?.thumbnails?.default?.url
+    || '';
+
+  const durMin = video.duracao ?? 0;
+  const durLabel = durMin >= 60
+    ? `${Math.floor(durMin / 60)}h ${durMin % 60}min`
+    : `${durMin} min`;
+
   wrapper.innerHTML = `
     <a class="video-item" href="https://youtube.com/watch?v=${id}" target="_blank" rel="noopener">
       <span class="video-order">#${i + 1}</span>
       <div class="video-thumb">
-        <img src="${video.snippet.thumbnails.high.url}" alt="Thumb do vídeo" loading="lazy" />
+        ${thumbUrl
+          ? `<img src="${thumbUrl}" alt="Miniatura do vídeo" loading="lazy" />`
+          : `<div class="video-thumb-placeholder">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                 <path d="M10 8l6 4-6 4V8z"/>
+               </svg>
+             </div>`
+        }
       </div>
       <div class="video-info">
         <h3>${video.snippet.title}</h3>
-        <p>${video.snippet.description}</p>
+        <p>${video.snippet.description || 'Sem descrição disponível.'}</p>
         <div class="video-meta">
-          <span class="meta-badge duration">${video.duracao ?? 0} minutos</span>
+          <span class="meta-badge duration">⏱ ${durLabel}</span>
           <span class="meta-badge channel">${video.snippet.channelTitle}</span>
         </div>
       </div>
@@ -121,6 +177,18 @@ function aparecerLista(videos) {
 
   if (container) {
     container.innerHTML = '';
+
+    if (videos.length === 0) {
+      container.innerHTML = `
+        <div class="state-placeholder">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <p>Nenhum vídeo encontrado para o tempo disponível hoje.</p>
+        </div>`;
+      return;
+    }
+
     videos.forEach((video, i) => {
       container.appendChild(criarCardVideo(video, i));
     });
@@ -149,44 +217,49 @@ function renderFavoritos() {
 }
 
 function obterDiaAtual() {
-
-  const hoje = new Date().getDay()
-
+  const hoje = new Date().getDay();
   if (hoje === 0) return "day-6";
-  return `day-${hoje - 1}`
+  return `day-${hoje - 1}`;
 }
 
 
 function filtrarVideos() {
-  const idDia = obterDiaAtual()
-  const inputDia = document.getElementById(idDia)
+  const idDia = obterDiaAtual();
+  const inputDia = document.getElementById(idDia);
 
   const tempoDisponivel = parseInt(inputDia.value) || 0;
 
   const todosVideos = JSON.parse(localStorage.getItem('videosSalvos')) || [];
 
   const videosFiltrados = tempoDisponivel === 0
-    ? todosVideos.filter(video => video.duracao >= 1)
-    : todosVideos.filter(video => video.duracao >= 1 && video.duracao <= tempoDisponivel);
-  aparecerLista(videosFiltrados);
+    ? todosVideos.filter(video => video.duracao >= 3)
+    : todosVideos.filter(video => video.duracao >= 2 && video.duracao <= tempoDisponivel);
 
+  aparecerLista(videosFiltrados);
 }
 
 
 document.querySelectorAll(".day-cell input").forEach(input => {
   input.addEventListener('input', () => {
     localStorage.setItem(input.id, input.value);
-    filtrarVideos()
+    filtrarVideos();
+  });
+});
 
-  })
-
-
-})
-
+// Search on Enter key
+inputVideos.addEventListener('keydown', async (e) => {
+  if (e.key === 'Enter') buttonVideos.click();
+});
 
 buttonVideos.addEventListener("click", async () => {
-  const termo = inputVideos.value;
-  if (termo) {
+  const termo = inputVideos.value.trim();
+  if (!termo) return;
+
+  // Clear previous error
+  document.getElementById('error-banner')?.classList.add('hidden');
+
+  setLoading(true);
+  try {
     const videos = await API(termo);
     const duracaoMap = await pegarDuracoes(videos);
 
@@ -198,10 +271,24 @@ buttonVideos.addEventListener("click", async () => {
 
     localStorage.setItem('videosSalvos', JSON.stringify(videosDuracao));
     filtrarVideos();
+  } catch (err) {
+    console.error(err);
+    mostrarErro('Falha ao conectar com a API. Tente novamente.');
+  } finally {
+    setLoading(false);
   }
-})
+});
+
+// Scroll-to-top button
+document.getElementById('btn-scroll-top')?.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 window.addEventListener("DOMContentLoaded", function () {
+  // Highlight today
+  destacarDiaHoje();
+
+  // Restore saved day values
   document.querySelectorAll(".day-cell input").forEach(input => {
     const valorSalvo = localStorage.getItem(input.id);
     if (valorSalvo != null) {
@@ -216,8 +303,3 @@ window.addEventListener("DOMContentLoaded", function () {
 
   renderFavoritos();
 });
-
-
-
-
-
