@@ -1,5 +1,5 @@
 
-const API_KEY = "AIzaSyBTBc6OLgxIK3BfkMJsjKsK7DoysZ3j4DQ";
+const API_KEY = "http://localhost:3000"; 
 const inputVideos = document.getElementById('searchVideos');
 const buttonVideos = document.getElementById('btn-search');
 
@@ -35,18 +35,16 @@ function setLoading(isLoading) {
   }
 }
 
-async function API(termo) {
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(termo)}&maxResults=50&type=video&key=${API_KEY}`;
+async function buscarDados(termo) {
+  try{
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(termo)}&maxResults=50&type=video&key=${API_KEY}`;
 
-  const resposta = await fetch(url);
+  const resposta = await fetch(`${API_KEY}/api/dados`);
   const dados = await resposta.json();
 
-  if (dados.error) {
-    console.error("Erro no API do youtube:", dados.error.message);
-    mostrarErro(dados.error.message);
-    return [];
+  } catch(error){
+    console.error("erro ao carregar o video", erro)
   }
-  return dados.items || [];
 }
 
 
