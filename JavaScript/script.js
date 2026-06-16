@@ -1,5 +1,5 @@
 
-const API_KEY = "http://localhost:3000"; 
+const API_KEY = "https://youtube-planner.onrender.com"; 
 const inputVideos = document.getElementById('searchVideos');
 const buttonVideos = document.getElementById('btn-search');
 
